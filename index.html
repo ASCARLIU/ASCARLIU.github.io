@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增强版随机职业与风格生成器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header {
+            text-align: center;
+            margin: 20px 0 40px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .box {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+        }
+        
+        .box-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .box-title i {
+            font-size: 2rem;
+            margin-right: 15px;
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .box-title h2 {
+            font-size: 1.8rem;
+        }
+        
+        .box-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 300px;
+        }
+        
+        .result-display {
+            width: 100%;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            text-align: center;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+        
+        .result-text {
+            font-size: 2rem;
+            font-weight: bold;
+            padding: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s ease;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(90deg, #00dbde, #fc00ff);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0, 219, 222, 0.3);
+        }
+        
+        .generate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 219, 222, 0.5);
+        }
+        
+        .generate-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .input-section {
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .input-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #a0a0c0;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .custom-input {
+            flex: 1;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .custom-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .add-btn {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .add-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #a0a0c0;
+            font-size: 0.9rem;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .highlight {
+            color: #00dbde;
+            font-weight: bold;
+        }
+        
+        .counter {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #a0a0c0;
+        }
+        
+        .counter span {
+            color: #fc00ff;
+            font-weight: bold;
+        }
+        
+        .info-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #8888cc;
+            font-style: italic;
+        }
+        
+        @media (max-width: 1100px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .box {
+                max-width: 600px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .result-text {
+                font-size: 1.6rem;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+            
+            .add-btn {
+                padding: 15px;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* 职业盒子特定样式 */
+        .career-box .result-text {
+            color: #00dbde;
+        }
+        
+        /* 风格盒子特定样式 */
+        .style-box .result-text {
+            color: #fc00ff;
+        }
+        
+        /* 刷新按钮样式 */
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-random"></i> 增强版随机职业与风格生成器</h1>
+        <p>点击左侧盒子生成随机职业（360个默认选项），点击右侧盒子生成随机风格（100个默认选项）。您也可以添加自定义职业或风格到列表中。</p>
+    </div>
+    
+    <div class="container">
+        <!-- 职业生成盒子 -->
+        <div class="box career-box">
+            <div class="box-title">
+                <i class="fas fa-user-tie"></i>
+                <h2>随机职业生成器</h2>
+            </div>
+            <div class="box-content">
+                <div class="result-display">
+                    <div class="result-text" id="career-result">点击生成</div>
+                </div>
+                <button class="generate-btn" id="generate-career">
+                    <i class="fas fa-briefcase"></i> 生成随机职业
+                </button>
+                <div class="input-section">
+                    <h3>添加自定义职业</h3>
+                    <div class="input-container">
+                        <input type="text" class="custom-input" id="custom-career" placeholder="输入新的职业，例如：星际矿工">
+                        <button class="add-btn" id="add-career">添加</button>
+                    </div>
+                </div>
+                <div class="counter">
+                    当前职业库：<span id="career-count">360</span> 个职业
+                </div>
+                <div class="info-text">
+                    <i class="fas fa-info-circle"></i> 包含传统职业、现代职业和未来职业
+                </div>
+            </div>
+        </div>
+        
+        <!-- 风格生成盒子 -->
+        <div class="box style-box">
+            <div class="box-title">
+                <i class="fas fa-palette"></i>
+                <h2>随机风格生成器</h2>
+            </div>
+            <div class="box-content">
+                <div class="result-display">
+                    <div class="result-text" id="style-result">点击生成</div>
+                </div>
+                <button class="generate-btn" id="generate-style">
+                    <i class="fas fa-magic"></i> 生成随机风格
+                </button>
+                <div class="input-section">
+                    <h3>添加自定义风格</h3>
+                    <div class="input-container">
+                        <input type="text" class="custom-input" id="custom-style" placeholder="输入新的风格，例如：量子朋克">
+                        <button class="add-btn" id="add-style">添加</button>
+                    </div>
+                </div>
+                <div class="counter">
+                    当前风格库：<span id="style-count">100</span> 个风格
+                </div>
+                <div class="info-text">
+                    <i class="fas fa-info-circle"></i> 包含艺术风格、文化风格和奇幻风格
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>每次点击都会从360个职业或100个风格中随机抽取一个项目。您可以随时添加自定义项目。</p>
+        <p>提示：尝试连续点击多次以获得不同的创意组合！</p>
+    </div>
+
+    <script>
+        // 扩展默认职业列表（360个职业）
+        const defaultCareers = [
+            // 传统职业 (80个)
+            "教师", "军人", "消防员", "商人", "律师", "医生", "护士", "工程师", 
+            "程序员", "设计师", "作家", "记者", "厨师", "警察", "司机", "飞行员", 
+            "宇航员", "科学家", "研究员", "建筑师", "会计师", "音乐家", "画家", 
+            "摄影师", "演员", "导演", "运动员", "教练", "农民", "渔民", "矿工", 
+            "电工", "水管工", "木匠", "焊工", "理发师", "美容师", "按摩师", 
+            "导游", "翻译", "售货员", "快递员", "外卖员", "清洁工", "保安", 
+            "法官", "检察官", "政治家", "企业家", "投资人", "银行家", "保险员",
+            "房地产经纪人", "市场营销", "人力资源", "行政人员", "秘书", "图书管理员",
+            "考古学家", "历史学家", "哲学家", "天文学家", "地质学家", "生物学家",
+            "化学家", "物理学家", "数学家", "心理学家", "社会学家", "经济学家",
+            "外交官", "军人", "海军", "空军", "陆军", "特种兵", "情报员", "间谍",
+            "牧师", "修道士", "传教士", "和尚", "道士", "占卜师", "巫师",
+            
+            // 现代职业 (100个)
+            "UI设计师", "UX设计师", "产品经理", "数据科学家", "机器学习工程师",
+            "人工智能专家", "区块链开发者", "网络安全专家", "游戏设计师",
+            "动画师", "影视特效师", "视频编辑", "播客主持人", "网红", "博主",
+            "社交媒体经理", "内容创作者", "SEO专家", "数字营销师", "电商运营",
+            "物流经理", "供应链专家", "质量检测员", "环境工程师", "城市规划师",
+            "交通工程师", "能源工程师", "可再生能源专家", "环保顾问", "生态学家",
+            "海洋学家", "气象学家", "食品科学家", "营养师", "健身教练", "瑜伽导师",
+            "心理咨询师", "职业规划师", "教育顾问", "翻译官", "同声传译",
+            "会展策划", "婚礼策划师", "活动策划", "旅游策划师", "酒店经理",
+            "餐厅经理", "咖啡师", "调酒师", "品酒师", "园艺师", "宠物美容师",
+            "兽医", "驯兽师", "动物园管理员", "海洋馆饲养员", "农场主", "酿酒师",
+            "面包师", "糕点师", "巧克力师", "品茶师", "香水调配师", "花艺师",
+            "珠宝设计师", "服装设计师", "鞋类设计师", "室内设计师", "景观设计师",
+            "工业设计师", "汽车设计师", "航空工程师", "船舶工程师", "机器人工程师",
+            "3D打印工程师", "无人机操作员", "虚拟现实开发者", "增强现实开发者",
+            "基因工程师", "生物技术研究员", "纳米技术专家", "材料科学家",
+            "药物研发员", "临床研究员", "医学影像师", "康复治疗师", "牙医",
+            "眼科医生", "儿科医生", "外科医生", "内科医生", "中医师", "针灸师",
+            "推拿师", "药剂师", "医学检验师", "救护车驾驶员", "急救员",
+            
+            // 未来职业 (80个)
+            "太空导游", "月球矿工", "火星殖民者", "星际货运员", "外星生物学家",
+            "宇宙生态学家", "星际外交官", "时空旅行顾问", "平行宇宙研究员",
+            "量子计算机程序员", "脑机接口工程师", "意识上传专家", "数字永生顾问",
+            "记忆编辑师", "梦境设计师", "情绪调节师", "基因定制顾问", "克隆技术专家",
+            "人造器官工程师", "抗衰老专家", "生命延长顾问", "意识复制师",
+            "虚拟偶像经纪人", "全息投影设计师", "神经游戏设计师", "感官体验师",
+            "气味工程师", "触感设计师", "味觉艺术家", "第六感开发者", "心灵感应研究员",
+            "超能力训练师", "意念控制开发者", "隐形技术专家", "物质传送工程师",
+            "反重力工程师", "虫洞旅行顾问", "曲速引擎设计师", "戴森球建筑师",
+            "太空太阳能工程师", "小行星矿工", "宇宙垃圾清理员", "外星语言翻译",
+            "星际法律顾问", "银河系贸易商", "宇宙保险员", "星际银行家",
+            "时间银行管理员", "记忆银行保管员", "技能上传师", "知识下载员",
+            "全知搜索引擎优化师", "宇宙历史学家", "未来预测师", "概率调整师",
+            "现实扭曲者", "维度旅行者", "多元宇宙导游", "平行自我联络员",
+            "意识网络管理员", "全球脑接口员", "集体意识协调员", "心灵治愈师",
+            "情绪气象预报员", "梦境警察", "虚拟现实建筑师", "增强现实内容创作者",
+            "混合现实体验师", "数字孪生工程师", "元宇宙地产商", "虚拟时尚设计师",
+            "数字艺术品鉴定师", "加密货币交易员", "NFT创作者", "DAO组织者",
+            "去中心化自治管理者", "智能合约审计师", "区块链法律顾问",
+            
+            // 创意职业 (100个)
+            "童话作家", "奇幻小说家", "科幻作家", "漫画画家", "插画师",
+            "角色设计师", "概念艺术家", "故事板画家", "游戏原画师", "模型师",
+            "纹理艺术家", "灯光师", "渲染师", "音效设计师", "配乐师",
+            "配音演员", "动作捕捉演员", "特技演员", "魔术师", "杂技演员",
+            "小丑", "街头艺人", "马戏团演员", "木偶师", "皮影戏演员",
+            "京剧演员", "歌剧演员", "芭蕾舞者", "现代舞者", "编舞师",
+            "音乐制作人", "DJ", "乐队指挥", "乐器制作师", "声乐教练",
+            "影评人", "美食评论家", "旅行作家", "时尚博主", "美妆博主",
+            "生活方式博主", "科技博主", "游戏主播", "电竞选手", "电竞教练",
+            "游戏测试员", "游戏策划", "关卡设计师", "系统设计师", "数值策划",
+            "剧情策划", "本地化翻译", "游戏社区经理", "电竞解说员", "赛事组织者",
+            "玩具设计师", "谜题设计师", "密室逃脱设计师", "桌游设计师",
+            "卡牌游戏设计师", "拼图设计师", "模型制作师", "手办设计师",
+            "cosplay服装师", "道具制作师", "特效化妆师", "纹身师",
+            "人体彩绘师", "沙画艺术家", "冰雕师", "雪雕师", "糖艺师",
+            "米雕师", "微雕师", "盆景师", "插花师", "茶艺师",
+            "香道师", "古琴师", "围棋选手", "象棋大师", "国际象棋选手",
+            "扑克牌选手", "魔术方块选手", "记忆大师", "速算师", "心算师",
+            "脱口秀演员", "相声演员", "主持人", "记者", "编辑",
+            "出版人", "文学代理人", "书评人", "图书馆员", "档案管理员",
+            "博物馆管理员", "文物修复师", "古董鉴定师", "艺术品拍卖师",
+            "画廊经理", "艺术经纪人", "策展人", "艺术评论家", "美术史学家"
+        ];
+        
+        // 扩展默认风格列表（100个风格）
+        const defaultStyles = [
+            // 历史文化风格 (25个)
+            "唐代古风", "宋代简约", "明代华丽", "清代宫廷", "古希腊风格",
+            "古罗马风格", "古埃及风格", "玛雅文明", "阿兹特克风格", "印度莫卧儿",
+            "日本和风", "韩国朝鲜时代", "泰国泰式", "越南风格", "阿拉伯伊斯兰",
+            "波斯风格", "奥斯曼帝国", "拜占庭风格", "哥特式", "文艺复兴",
+            "巴洛克风格", "洛可可风格", "新古典主义", "浪漫主义", "维多利亚时代",
+            
+            // 现代艺术风格 (25个)
+            "印象派", "后印象派", "表现主义", "立体主义", "未来主义",
+            "达达主义", "超现实主义", "抽象表现主义", "波普艺术", "极简主义",
+            "概念艺术", "装置艺术", "行为艺术", "大地艺术", "光艺术",
+            "数字艺术", "新媒体艺术", "街头艺术", "涂鸦艺术", "漫画风格",
+            "动漫风格", "像素艺术", "低多边形", "扁平化设计", "渐变风格",
+            
+            // 科幻未来风格 (25个)
+            "赛博朋克", "蒸汽朋克", "柴油朋克", "原子朋克", "生物朋克",
+            "纳米朋克", "太阳能朋克", "气候朋克", "太空歌剧", "硬科幻",
+            "软科幻", "外星风格", "星际旅行", "未来城市", "反乌托邦",
+            "乌托邦", "后末日", "废土风格", "机械美学", "合成器浪潮",
+            "霓虹美学", "全息投影", "虚拟现实", "增强现实", "元宇宙风格",
+            
+            // 奇幻魔法风格 (25个)
+            "魔幻现实主义", "高奇幻", "低奇幻", "黑暗奇幻", "光明奇幻",
+            "童话风格", "神话风格", "龙与地下城", "中世纪奇幻", "东方奇幻",
+            "西方奇幻", "精灵风格", "矮人风格", "兽人风格", "魔法学院",
+            "巫师世界", "吸血鬼风格", "狼人风格", "幽灵风格", "僵尸启示录",
+            "克苏鲁风格", "洛夫克拉夫特式", "童话王国", "糖果世界", "巧克力王国",
+            
+            // 自然环境风格 (20个)
+            "海底世界", "热带雨林", "沙漠风情", "雪山之巅", "草原牧场",
+            "森林深处", "田园风光", "乡村风格", "海滩度假", "岛屿天堂",
+            "北极光", "星空宇宙", "云上世界", "火山地带", "洞穴探险",
+            "花园仙境", "植物园", "动物园风格", "水族馆", "自然保护区",
+            
+            // 特殊主题风格 (15个)
+            "会说话的动物伙伴", "机器人伙伴", "人工智能助手", "时间旅行", "平行宇宙",
+            "梦境世界", "潜意识空间", "记忆宫殿", "思维导图", "情感可视化",
+            "数据可视化", "信息图表", "教育风格", "儿童风格", "老年友好"
+        ];
+        
+        // 初始化职业和风格数组
+        let careers = [...defaultCareers];
+        let styles = [...defaultStyles];
+        
+        // 获取DOM元素
+        const careerResult = document.getElementById('career-result');
+        const styleResult = document.getElementById('style-result');
+        const generateCareerBtn = document.getElementById('generate-career');
+        const generateStyleBtn = document.getElementById('generate-style');
+        const customCareerInput = document.getElementById('custom-career');
+        const customStyleInput = document.getElementById('custom-style');
+        const addCareerBtn = document.getElementById('add-career');
+        const addStyleBtn = document.getElementById('add-style');
+        const careerCount = document.getElementById('career-count');
+        const styleCount = document.getElementById('style-count');
+        
+        // 更新计数器
+        function updateCounters() {
+            careerCount.textContent = careers.length;
+            styleCount.textContent = styles.length;
+        }
+        
+        // 初始化计数器
+        updateCounters();
+        
+        // 生成随机职业
+        function generateRandomCareer() {
+            if (careers.length === 0) {
+                careerResult.textContent = "请先添加职业";
+                return;
+            }
+            
+            // 随机选择一个职业
+            const randomIndex = Math.floor(Math.random() * careers.length);
+            const selectedCareer = careers[randomIndex];
+            
+            // 添加动画效果
+            careerResult.classList.remove('fade-in');
+            void careerResult.offsetWidth; // 触发重排以重新开始动画
+            careerResult.classList.add('fade-in');
+            
+            // 显示结果
+            careerResult.textContent = selectedCareer;
+            
+            // 可选：在控制台记录生成历史
+            console.log(`生成的职业: ${selectedCareer} (第${randomIndex + 1}个/共${careers.length}个)`);
+        }
+        
+        // 生成随机风格
+        function generateRandomStyle() {
+            if (styles.length === 0) {
+                styleResult.textContent = "请先添加风格";
+                return;
+            }
+            
+            // 随机选择一个风格
+            const randomIndex = Math.floor(Math.random() * styles.length);
+            const selectedStyle = styles[randomIndex];
+            
+            // 添加动画效果
+            styleResult.classList.remove('fade-in');
+            void styleResult.offsetWidth; // 触发重排以重新开始动画
+            styleResult.classList.add('fade-in');
+            
+            // 显示结果
+            styleResult.textContent = selectedStyle;
+            
+            // 可选：在控制台记录生成历史
+            console.log(`生成的风格: ${selectedStyle} (第${randomIndex + 1}个/共${styles.length}个)`);
+        }
+        
+        // 添加自定义职业
+        function addCustomCareer() {
+            const newCareer = customCareerInput.value.trim();
+            
+            if (newCareer === "") {
+                alert("请输入有效的职业名称");
+                return;
+            }
+            
+            // 检查是否已存在
+            if (careers.includes(newCareer)) {
+                alert("该职业已存在于列表中");
+                return;
+            }
+            
+            // 添加到职业列表
+            careers.push(newCareer);
+            
+            // 更新计数器
+            updateCounters();
+            
+            // 清空输入框
+            customCareerInput.value = "";
+            
+            // 提示添加成功
+            alert(`成功添加职业: ${newCareer}\n当前职业总数: ${careers.length}`);
+            
+            // 记录添加历史
+            console.log(`添加的职业: ${newCareer}, 当前职业总数: ${careers.length}`);
+        }
+        
+        // 添加自定义风格
+        function addCustomStyle() {
+            const newStyle = customStyleInput.value.trim();
+            
+            if (newStyle === "") {
+                alert("请输入有效的风格名称");
+                return;
+            }
+            
+            // 检查是否已存在
+            if (styles.includes(newStyle)) {
+                alert("该风格已存在于列表中");
+                return;
+            }
+            
+            // 添加到风格列表
+            styles.push(newStyle);
+            
+            // 更新计数器
+            updateCounters();
+            
+            // 清空输入框
+            customStyleInput.value = "";
+            
+            // 提示添加成功
+            alert(`成功添加风格: ${newStyle}\n当前风格总数: ${styles.length}`);
+            
+            // 记录添加历史
+            console.log(`添加的风格: ${newStyle}, 当前风格总数: ${styles.length}`);
+        }
+        
+        // 快速连续生成函数
+        function rapidGenerate(button, generator, count) {
+            let i = 0;
+            const interval = setInterval(() => {
+                generator();
+                i++;
+                if (i >= count) {
+                    clearInterval(interval);
+                    button.disabled = false;
+                    button.innerHTML = `<i class="fas fa-bolt"></i> 快速生成10次`;
+                }
+            }, 100);
+        }
+        
+        // 事件监听
+        generateCareerBtn.addEventListener('click', generateRandomCareer);
+        generateStyleBtn.addEventListener('click', generateRandomStyle);
+        addCareerBtn.addEventListener('click', addCustomCareer);
+        addStyleBtn.addEventListener('click', addCustomStyle);
+        
+        // 允许按Enter键添加
+        customCareerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addCustomCareer();
+            }
+        });
+        
+        customStyleInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addCustomStyle();
+            }
+        });
+        
+        // 双击快速生成
+        generateCareerBtn.addEventListener('dblclick', function() {
+            this.disabled = true;
+            this.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> 快速生成中...`;
+            rapidGenerate(this, generateRandomCareer, 10);
+        });
+        
+        generateStyleBtn.addEventListener('dblclick', function() {
+            this.disabled = true;
+            this.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> 快速生成中...`;
+            rapidGenerate(this, generateRandomStyle, 10);
+        });
+        
+        // 页面加载时生成初始结果
+        window.addEventListener('load', function() {
+            // 延迟一点时间显示初始结果，以获得更好的视觉效果
+            setTimeout(() => {
+                generateRandomCareer();
+                generateRandomStyle();
+            }, 300);
+        });
+    </script>
+</body>
+</html>
