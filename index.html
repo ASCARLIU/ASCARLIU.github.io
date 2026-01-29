@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>增强版随机职业与风格生成器</title>
+    <title>AI绘画提示词生成器</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -43,7 +43,7 @@
         .header p {
             font-size: 1.2rem;
             color: #a0a0c0;
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
             line-height: 1.6;
         }
@@ -100,6 +100,25 @@
             flex-direction: column;
             align-items: center;
             min-height: 300px;
+        }
+        
+        .category-selector, .style-category-selector {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .category-selector option, .style-category-selector option {
+            background: #1a1a2e;
+            color: white;
+            padding: 10px;
         }
         
         .result-display {
@@ -221,11 +240,141 @@
             font-weight: bold;
         }
         
-        .info-text {
+        .category-info {
             margin-top: 10px;
             font-size: 0.9rem;
-            color: #8888cc;
+            color: #a0a0c0;
             font-style: italic;
+        }
+        
+        /* 升级后的提示词生成区域 */
+        .prompt-output {
+            margin-top: 40px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .prompt-output h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #a0a0c0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .prompt-text {
+            font-size: 1.2rem;
+            font-weight: normal;
+            color: #fff;
+            min-height: 180px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .prompt-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .action-btn.copied {
+            background: rgba(0, 200, 83, 0.3);
+            border-color: #00c853;
+        }
+        
+        .action-btn.regenerate {
+            background: rgba(33, 150, 243, 0.3);
+            border-color: #2196f3;
+        }
+        
+        .action-btn.regenerate:hover {
+            background: rgba(33, 150, 243, 0.5);
+        }
+        
+        .action-btn.settings {
+            background: rgba(156, 39, 176, 0.3);
+            border-color: #9c27b0;
+        }
+        
+        .action-btn.settings:hover {
+            background: rgba(156, 39, 176, 0.5);
+        }
+        
+        .prompt-settings {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .prompt-settings.active {
+            display: block;
+        }
+        
+        .setting-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .setting-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .setting-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a0a0c0;
+        }
+        
+        .setting-select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .prompt-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            color: #8888cc;
+            font-size: 0.9rem;
         }
         
         @media (max-width: 1100px) {
@@ -239,7 +388,7 @@
             }
         }
         
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .header h1 {
                 font-size: 2.2rem;
             }
@@ -255,11 +404,23 @@
             .add-btn {
                 padding: 15px;
             }
+            
+            .prompt-text {
+                font-size: 1rem;
+            }
+            
+            .prompt-actions {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
         
-        /* 动画效果 */
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
+            from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
         }
         
@@ -267,66 +428,58 @@
             animation: fadeIn 0.5s ease forwards;
         }
         
-        /* 职业盒子特定样式 */
-        .career-box .result-text {
+        .category-box .result-text {
             color: #00dbde;
         }
         
-        /* 风格盒子特定样式 */
         .style-box .result-text {
             color: #fc00ff;
-        }
-        
-        /* 刷新按钮样式 */
-        .refresh-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-left: 10px;
-            font-size: 0.9rem;
-        }
-        
-        .refresh-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1><i class="fas fa-random"></i> 增强版随机职业与风格生成器</h1>
-        <p>点击左侧盒子生成随机职业（360个默认选项），点击右侧盒子生成随机风格（100个默认选项）。您也可以添加自定义职业或风格到列表中。</p>
+        <h1><i class="fas fa-robot"></i> AI绘画提示词生成器</h1>
+        <p>选择内容与风格，自动生成完整的AI绘画提示词，包含画面细节、构图、光影、画质等参数。</p>
     </div>
     
     <div class="container">
-        <!-- 职业生成盒子 -->
-        <div class="box career-box">
+        <!-- 内容生成盒子 -->
+        <div class="box category-box">
             <div class="box-title">
-                <i class="fas fa-user-tie"></i>
-                <h2>随机职业生成器</h2>
+                <i class="fas fa-layer-group"></i>
+                <h2>内容生成器</h2>
             </div>
             <div class="box-content">
+                <select class="category-selector" id="category-selector">
+                    <option value="career">人的职业 (200+ 选项)</option>
+                    <option value="animal">动物世界 (150+ 选项)</option>
+                    <option value="building">建筑与地标 (120+ 选项)</option>
+                    <option value="item">生活用品 (100+ 选项)</option>
+                    <option value="food">食物与饮品 (100+ 选项)</option>
+                    <option value="plant">植物与花卉 (80+ 选项)</option>
+                    <option value="vehicle">交通工具 (80+ 选项)</option>
+                    <option value="fantasy">奇幻生物 (70+ 选项)</option>
+                    <option value="sport">体育运动 (60+ 选项)</option>
+                    <option value="instrument">乐器与工具 (60+ 选项)</option>
+                </select>
+                
                 <div class="result-display">
-                    <div class="result-text" id="career-result">点击生成</div>
+                    <div class="result-text" id="category-result">选择类别并生成</div>
                 </div>
-                <button class="generate-btn" id="generate-career">
-                    <i class="fas fa-briefcase"></i> 生成随机职业
+                <button class="generate-btn" id="generate-category">
+                    <i class="fas fa-dice"></i> 生成随机内容
                 </button>
                 <div class="input-section">
-                    <h3>添加自定义职业</h3>
+                    <h3>添加自定义内容</h3>
                     <div class="input-container">
-                        <input type="text" class="custom-input" id="custom-career" placeholder="输入新的职业，例如：星际矿工">
-                        <button class="add-btn" id="add-career">添加</button>
+                        <input type="text" class="custom-input" id="custom-category" placeholder="输入新的内容，例如：太空电梯">
+                        <button class="add-btn" id="add-category">添加</button>
                     </div>
+                    <p class="category-info" id="category-info">当前类别：人的职业 | 项目总数：200+</p>
                 </div>
                 <div class="counter">
-                    当前职业库：<span id="career-count">360</span> 个职业
-                </div>
-                <div class="info-text">
-                    <i class="fas fa-info-circle"></i> 包含传统职业、现代职业和未来职业
+                    当前类别项目库：<span id="category-count">200+</span> 个项目
                 </div>
             </div>
         </div>
@@ -335,11 +488,22 @@
         <div class="box style-box">
             <div class="box-title">
                 <i class="fas fa-palette"></i>
-                <h2>随机风格生成器</h2>
+                <h2>风格生成器</h2>
             </div>
             <div class="box-content">
+                <select class="style-category-selector" id="style-category-selector">
+                    <option value="all">全部风格 (150+ 选项)</option>
+                    <option value="master">大师风格 (35+ 选项)</option>
+                    <option value="scifi">科幻未来 (25+ 选项)</option>
+                    <option value="fantasy">奇幻魔幻 (20+ 选项)</option>
+                    <option value="art">艺术流派 (20+ 选项)</option>
+                    <option value="culture">文化风格 (15+ 选项)</option>
+                    <option value="digital">数字艺术 (10+ 选项)</option>
+                    <option value="nature">自然场景 (10+ 选项)</option>
+                </select>
+                
                 <div class="result-display">
-                    <div class="result-text" id="style-result">点击生成</div>
+                    <div class="result-text" id="style-result">选择类别并生成</div>
                 </div>
                 <button class="generate-btn" id="generate-style">
                     <i class="fas fa-magic"></i> 生成随机风格
@@ -350,248 +514,741 @@
                         <input type="text" class="custom-input" id="custom-style" placeholder="输入新的风格，例如：量子朋克">
                         <button class="add-btn" id="add-style">添加</button>
                     </div>
+                    <p class="category-info" id="style-info">当前类别：全部风格 | 风格总数：150+</p>
                 </div>
                 <div class="counter">
-                    当前风格库：<span id="style-count">100</span> 个风格
+                    当前类别风格库：<span id="style-count">150+</span> 个风格
                 </div>
-                <div class="info-text">
-                    <i class="fas fa-info-circle"></i> 包含艺术风格、文化风格和奇幻风格
+            </div>
+        </div>
+    </div>
+    
+    <!-- 升级后的AI绘画提示词生成区域 -->
+    <div class="prompt-output">
+        <h3>
+            <span><i class="fas fa-lightbulb"></i> AI绘画完整提示词</span>
+            <span id="prompt-length">长度: 0 字符</span>
+        </h3>
+        <div class="prompt-text" id="prompt-text">
+            生成内容与风格后，完整的AI绘画提示词将显示在这里。
+            提示词包含：主体描述、风格细节、构图、光影、画质等参数。
+        </div>
+        
+        <div class="prompt-stats">
+            <div><i class="fas fa-paint-brush"></i> 风格强度: <span id="style-strength">中等</span></div>
+            <div><i class="fas fa-camera"></i> 画质等级: <span id="quality-level">高清</span></div>
+            <div><i class="fas fa-sun"></i> 光照类型: <span id="lighting-type">动态</span></div>
+        </div>
+        
+        <div class="prompt-actions">
+            <button class="action-btn" id="copy-prompt">
+                <i class="fas fa-copy"></i> 复制提示词
+            </button>
+            <button class="action-btn regenerate" id="regenerate-prompt">
+                <i class="fas fa-redo"></i> 重新生成提示词
+            </button>
+            <button class="action-btn settings" id="toggle-settings">
+                <i class="fas fa-cog"></i> 提示词设置
+            </button>
+        </div>
+        
+        <div class="prompt-settings" id="prompt-settings">
+            <div class="setting-row">
+                <div class="setting-group">
+                    <label>风格强度</label>
+                    <select class="setting-select" id="style-strength-select">
+                        <option value="subtle">轻微 (Subtle)</option>
+                        <option value="medium" selected>中等 (Medium)</option>
+                        <option value="strong">强烈 (Strong)</option>
+                        <option value="very-strong">非常强烈 (Very Strong)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>画质等级</label>
+                    <select class="setting-select" id="quality-select">
+                        <option value="standard">标准 (Standard)</option>
+                        <option value="high" selected>高清 (High Quality)</option>
+                        <option value="ultra">超高清 (Ultra Quality)</option>
+                        <option value="masterpiece">大师级 (Masterpiece)</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>光照类型</label>
+                    <select class="setting-select" id="lighting-select">
+                        <option value="dynamic">动态光影 (Dynamic Lighting)</option>
+                        <option value="dramatic">戏剧性 (Dramatic)</option>
+                        <option value="soft">柔和 (Soft Lighting)</option>
+                        <option value="studio">摄影棚 (Studio Lighting)</option>
+                        <option value="natural">自然光 (Natural Light)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-group">
+                    <label>构图类型</label>
+                    <select class="setting-select" id="composition-select">
+                        <option value="dynamic">动态构图</option>
+                        <option value="centered" selected>中心构图</option>
+                        <option value="rule-of-thirds">三分法构图</option>
+                        <option value="close-up">特写构图</option>
+                        <option value="wide-shot">广角构图</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>艺术媒介</label>
+                    <select class="setting-select" id="medium-select">
+                        <option value="digital-painting" selected>数字绘画</option>
+                        <option value="oil-painting">油画</option>
+                        <option value="watercolor">水彩画</option>
+                        <option value="sketch">素描</option>
+                        <option value="photography">摄影</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>渲染引擎</label>
+                    <select class="setting-select" id="render-select">
+                        <option value="octane">Octane渲染</option>
+                        <option value="arnold">Arnold渲染</option>
+                        <option value="cycles" selected>Cycles渲染</option>
+                        <option value="unreal">虚幻引擎</option>
+                        <option value="vray">VRay渲染</option>
+                    </select>
                 </div>
             </div>
         </div>
     </div>
     
     <div class="footer">
-        <p>每次点击都会从360个职业或100个风格中随机抽取一个项目。您可以随时添加自定义项目。</p>
-        <p>提示：尝试连续点击多次以获得不同的创意组合！</p>
+        <p>提示：生成的提示词可直接用于Midjourney、Stable Diffusion、DALL-E等AI绘画工具。</p>
+        <p>您可以根据需要调整提示词设置，以获得不同风格的图像效果。</p>
     </div>
 
     <script>
-        // 扩展默认职业列表（360个职业）
-        const defaultCareers = [
-            // 传统职业 (80个)
-            "教师", "军人", "消防员", "商人", "律师", "医生", "护士", "工程师", 
-            "程序员", "设计师", "作家", "记者", "厨师", "警察", "司机", "飞行员", 
-            "宇航员", "科学家", "研究员", "建筑师", "会计师", "音乐家", "画家", 
-            "摄影师", "演员", "导演", "运动员", "教练", "农民", "渔民", "矿工", 
-            "电工", "水管工", "木匠", "焊工", "理发师", "美容师", "按摩师", 
-            "导游", "翻译", "售货员", "快递员", "外卖员", "清洁工", "保安", 
-            "法官", "检察官", "政治家", "企业家", "投资人", "银行家", "保险员",
-            "房地产经纪人", "市场营销", "人力资源", "行政人员", "秘书", "图书管理员",
-            "考古学家", "历史学家", "哲学家", "天文学家", "地质学家", "生物学家",
-            "化学家", "物理学家", "数学家", "心理学家", "社会学家", "经济学家",
-            "外交官", "军人", "海军", "空军", "陆军", "特种兵", "情报员", "间谍",
-            "牧师", "修道士", "传教士", "和尚", "道士", "占卜师", "巫师",
-            
-            // 现代职业 (100个)
-            "UI设计师", "UX设计师", "产品经理", "数据科学家", "机器学习工程师",
-            "人工智能专家", "区块链开发者", "网络安全专家", "游戏设计师",
-            "动画师", "影视特效师", "视频编辑", "播客主持人", "网红", "博主",
-            "社交媒体经理", "内容创作者", "SEO专家", "数字营销师", "电商运营",
-            "物流经理", "供应链专家", "质量检测员", "环境工程师", "城市规划师",
-            "交通工程师", "能源工程师", "可再生能源专家", "环保顾问", "生态学家",
-            "海洋学家", "气象学家", "食品科学家", "营养师", "健身教练", "瑜伽导师",
-            "心理咨询师", "职业规划师", "教育顾问", "翻译官", "同声传译",
-            "会展策划", "婚礼策划师", "活动策划", "旅游策划师", "酒店经理",
-            "餐厅经理", "咖啡师", "调酒师", "品酒师", "园艺师", "宠物美容师",
-            "兽医", "驯兽师", "动物园管理员", "海洋馆饲养员", "农场主", "酿酒师",
-            "面包师", "糕点师", "巧克力师", "品茶师", "香水调配师", "花艺师",
-            "珠宝设计师", "服装设计师", "鞋类设计师", "室内设计师", "景观设计师",
-            "工业设计师", "汽车设计师", "航空工程师", "船舶工程师", "机器人工程师",
-            "3D打印工程师", "无人机操作员", "虚拟现实开发者", "增强现实开发者",
-            "基因工程师", "生物技术研究员", "纳米技术专家", "材料科学家",
-            "药物研发员", "临床研究员", "医学影像师", "康复治疗师", "牙医",
-            "眼科医生", "儿科医生", "外科医生", "内科医生", "中医师", "针灸师",
-            "推拿师", "药剂师", "医学检验师", "救护车驾驶员", "急救员",
-            
-            // 未来职业 (80个)
-            "太空导游", "月球矿工", "火星殖民者", "星际货运员", "外星生物学家",
-            "宇宙生态学家", "星际外交官", "时空旅行顾问", "平行宇宙研究员",
-            "量子计算机程序员", "脑机接口工程师", "意识上传专家", "数字永生顾问",
-            "记忆编辑师", "梦境设计师", "情绪调节师", "基因定制顾问", "克隆技术专家",
-            "人造器官工程师", "抗衰老专家", "生命延长顾问", "意识复制师",
-            "虚拟偶像经纪人", "全息投影设计师", "神经游戏设计师", "感官体验师",
-            "气味工程师", "触感设计师", "味觉艺术家", "第六感开发者", "心灵感应研究员",
-            "超能力训练师", "意念控制开发者", "隐形技术专家", "物质传送工程师",
-            "反重力工程师", "虫洞旅行顾问", "曲速引擎设计师", "戴森球建筑师",
-            "太空太阳能工程师", "小行星矿工", "宇宙垃圾清理员", "外星语言翻译",
-            "星际法律顾问", "银河系贸易商", "宇宙保险员", "星际银行家",
-            "时间银行管理员", "记忆银行保管员", "技能上传师", "知识下载员",
-            "全知搜索引擎优化师", "宇宙历史学家", "未来预测师", "概率调整师",
-            "现实扭曲者", "维度旅行者", "多元宇宙导游", "平行自我联络员",
-            "意识网络管理员", "全球脑接口员", "集体意识协调员", "心灵治愈师",
-            "情绪气象预报员", "梦境警察", "虚拟现实建筑师", "增强现实内容创作者",
-            "混合现实体验师", "数字孪生工程师", "元宇宙地产商", "虚拟时尚设计师",
-            "数字艺术品鉴定师", "加密货币交易员", "NFT创作者", "DAO组织者",
-            "去中心化自治管理者", "智能合约审计师", "区块链法律顾问",
-            
-            // 创意职业 (100个)
-            "童话作家", "奇幻小说家", "科幻作家", "漫画画家", "插画师",
-            "角色设计师", "概念艺术家", "故事板画家", "游戏原画师", "模型师",
-            "纹理艺术家", "灯光师", "渲染师", "音效设计师", "配乐师",
-            "配音演员", "动作捕捉演员", "特技演员", "魔术师", "杂技演员",
-            "小丑", "街头艺人", "马戏团演员", "木偶师", "皮影戏演员",
-            "京剧演员", "歌剧演员", "芭蕾舞者", "现代舞者", "编舞师",
-            "音乐制作人", "DJ", "乐队指挥", "乐器制作师", "声乐教练",
-            "影评人", "美食评论家", "旅行作家", "时尚博主", "美妆博主",
-            "生活方式博主", "科技博主", "游戏主播", "电竞选手", "电竞教练",
-            "游戏测试员", "游戏策划", "关卡设计师", "系统设计师", "数值策划",
-            "剧情策划", "本地化翻译", "游戏社区经理", "电竞解说员", "赛事组织者",
-            "玩具设计师", "谜题设计师", "密室逃脱设计师", "桌游设计师",
-            "卡牌游戏设计师", "拼图设计师", "模型制作师", "手办设计师",
-            "cosplay服装师", "道具制作师", "特效化妆师", "纹身师",
-            "人体彩绘师", "沙画艺术家", "冰雕师", "雪雕师", "糖艺师",
-            "米雕师", "微雕师", "盆景师", "插花师", "茶艺师",
-            "香道师", "古琴师", "围棋选手", "象棋大师", "国际象棋选手",
-            "扑克牌选手", "魔术方块选手", "记忆大师", "速算师", "心算师",
-            "脱口秀演员", "相声演员", "主持人", "记者", "编辑",
-            "出版人", "文学代理人", "书评人", "图书馆员", "档案管理员",
-            "博物馆管理员", "文物修复师", "古董鉴定师", "艺术品拍卖师",
-            "画廊经理", "艺术经纪人", "策展人", "艺术评论家", "美术史学家"
-        ];
+        // 内容库（保持不变）
+        const categoryLibraries = {
+            career: {
+                name: "人的职业",
+                items: [
+                    "教师", "军人", "消防员", "商人", "律师", "医生", "护士", "工程师", 
+                    "程序员", "设计师", "作家", "记者", "厨师", "警察", "司机", "飞行员", 
+                    "宇航员", "科学家", "研究员", "建筑师", "会计师", "音乐家", "画家", 
+                    "摄影师", "演员", "导演", "运动员", "教练", "农民", "渔民", "矿工", 
+                    "电工", "水管工", "木匠", "焊工", "理发师", "美容师", "按摩师", 
+                    "导游", "翻译", "售货员", "快递员", "外卖员", "清洁工", "保安", 
+                    "法官", "检察官", "政治家", "企业家", "投资人", "银行家", "保险员",
+                    "太空导游", "月球矿工", "火星殖民者", "星际货运员", "外星生物学家",
+                    "宇宙生态学家", "星际外交官", "时空旅行顾问", "平行宇宙研究员",
+                    "量子计算机程序员", "脑机接口工程师", "意识上传专家", "数字永生顾问",
+                    "记忆编辑师", "梦境设计师", "情绪调节师", "基因定制顾问", "克隆技术专家"
+                ]
+            },
+            animal: {
+                name: "动物世界",
+                items: [
+                    "狮子", "老虎", "大象", "长颈鹿", "斑马", "熊猫", "考拉", "袋鼠",
+                    "鲸鱼", "海豚", "鲨鱼", "章鱼", "海星", "企鹅", "信天翁", "老鹰",
+                    "猫头鹰", "孔雀", "鹦鹉", "火烈鸟", "天鹅", "燕子", "麻雀", "乌鸦",
+                    "狗", "猫", "兔子", "仓鼠", "豚鼠", "刺猬", "马", "牛", "羊", "猪",
+                    "鸡", "鸭", "鹅", "火鸡", "骆驼", "羊驼", "骆驼", "犀牛", "河马",
+                    "鳄鱼", "乌龟", "蜥蜴", "变色龙", "蛇", "青蛙", "蟾蜍", "蝴蝶",
+                    "蜜蜂", "蚂蚁", "蜘蛛", "蝎子", "萤火虫", "蜻蜓", "瓢虫", "蝉",
+                    "会说话的猫", "会说话的狗", "会唱歌的鸟", "会跳舞的熊", "会魔法的狐狸",
+                    "会隐身的变色龙", "会飞的鱼", "会游泳的兔子", "会算术的鹦鹉", "会预言的老鹰"
+                ]
+            },
+            building: {
+                name: "建筑与地标",
+                items: [
+                    "埃菲尔铁塔", "自由女神像", "大本钟", "悉尼歌剧院", "金字塔",
+                    "长城", "故宫", "泰姬陵", "雅典卫城", "罗马斗兽场", "比萨斜塔",
+                    "圣索菲亚大教堂", "克里姆林宫", "白宫", "帝国大厦", "金门大桥",
+                    "东京塔", "哈利法塔", "帆船酒店", "双子塔", "卢浮宫", "凯旋门",
+                    "圣彼得大教堂", "科隆大教堂", "米兰大教堂", "圣瓦西里大教堂",
+                    "吴哥窟", "婆罗浮屠", "马丘比丘", "复活节岛石像", "巨石阵",
+                    "客家土楼", "布达拉宫", "莫高窟", "颐和园", "圆明园", "天坛",
+                    "城堡", "宫殿", "教堂", "寺庙", "佛塔", "清真寺", "摩天大楼",
+                    "别墅", "小屋", "树屋", "水上屋", "冰屋", "蒙古包", "土坯房",
+                    "太空电梯", "天空之城", "海底城市", "地心基地", "火星殖民地",
+                    "未来建筑", "智能房屋", "生态建筑", "可变形建筑", "透明建筑"
+                ]
+            },
+            item: {
+                name: "生活用品",
+                items: [
+                    "手机", "电脑", "平板", "电视", "冰箱", "洗衣机", "空调", "微波炉",
+                    "电饭煲", "咖啡机", "榨汁机", "吸尘器", "电风扇", "电暖器", "台灯",
+                    "床", "沙发", "桌子", "椅子", "衣柜", "书架", "镜子", "钟表",
+                    "碗", "盘子", "杯子", "筷子", "勺子", "叉子", "刀", "锅", "壶",
+                    "牙刷", "牙膏", "毛巾", "肥皂", "洗发水", "沐浴露", "化妆品",
+                    "衣服", "裤子", "鞋子", "帽子", "围巾", "手套", "包包", "钱包",
+                    "钥匙", "锁", "锤子", "螺丝刀", "钳子", "锯子", "尺子", "剪刀",
+                    "纸", "笔", "笔记本", "书", "杂志", "报纸", "信封", "邮票",
+                    "智能手表", "无人机", "VR眼镜", "智能音箱", "机器人", "3D打印机"
+                ]
+            },
+            food: {
+                name: "食物与饮品",
+                items: [
+                    "披萨", "汉堡", "薯条", "炸鸡", "热狗", "三明治", "寿司", "拉面",
+                    "饺子", "包子", "馒头", "面条", "米饭", "粥", "汤", "沙拉",
+                    "蛋糕", "饼干", "面包", "巧克力", "冰淇淋", "布丁", "果冻", "糖果",
+                    "苹果", "香蕉", "橙子", "葡萄", "草莓", "西瓜", "桃子", "梨",
+                    "胡萝卜", "土豆", "番茄", "黄瓜", "菠菜", "西兰花", "蘑菇", "洋葱",
+                    "牛肉", "猪肉", "鸡肉", "鱼肉", "虾", "蟹", "贝类", "鸡蛋",
+                    "牛奶", "酸奶", "奶酪", "黄油", "咖啡", "茶", "果汁", "汽水",
+                    "红酒", "啤酒", "白酒", "鸡尾酒", "清酒", "威士忌", "伏特加",
+                    "魔法药水", "能量饮料", "太空食品", "未来营养剂", "智能食物"
+                ]
+            },
+            plant: {
+                name: "植物与花卉",
+                items: [
+                    "玫瑰", "百合", "郁金香", "向日葵", "菊花", "牡丹", "荷花", "梅花",
+                    "兰花", "茉莉花", "桂花", "杜鹃花", "樱花", "桃花", "梨花", "杏花",
+                    "松树", "柏树", "柳树", "杨树", "榕树", "枫树", "银杏", "梧桐",
+                    "橡树", "棕榈树", "竹子", "仙人掌", "多肉植物", "蕨类植物", "苔藓",
+                    "蘑菇", "灵芝", "人参", "枸杞", "薄荷", "薰衣草", "迷迭香", "罗勒",
+                    "小麦", "水稻", "玉米", "大豆", "棉花", "甘蔗", "茶叶", "咖啡豆",
+                    "会发光的蘑菇", "会唱歌的花", "会走路的树", "会变色的叶子", "会结果的藤蔓",
+                    "魔法草药", "治愈植物", "食人花", "跳舞草", "害羞草", "捕蝇草"
+                ]
+            },
+            vehicle: {
+                name: "交通工具",
+                items: [
+                    "汽车", "公交车", "出租车", "摩托车", "自行车", "电动车", "滑板车",
+                    "火车", "高铁", "地铁", "磁悬浮", "飞机", "直升机", "无人机", "飞艇",
+                    "轮船", "游艇", "帆船", "潜水艇", "气垫船", "航空母舰", "油轮",
+                    "坦克", "装甲车", "军用卡车", "救护车", "消防车", "警车", "工程车",
+                    "拖拉机", "收割机", "挖掘机", "起重机", "推土机", "压路机", "混凝土车",
+                    "宇宙飞船", "航天飞机", "火箭", "卫星", "空间站", "月球车", "火星车",
+                    "飞行汽车", "磁悬浮汽车", "水下汽车", "智能汽车", "自动驾驶汽车",
+                    "时间机器", "传送门", "虫洞旅行器", "曲速引擎飞船", "反重力车辆"
+                ]
+            },
+            fantasy: {
+                name: "奇幻生物",
+                items: [
+                    "龙", "凤凰", "独角兽", "美人鱼", "精灵", "矮人", "巨人", "兽人",
+                    "哥布林", "地精", "食人魔", "巨魔", "牛头人", "半人马", "蝎尾狮",
+                    "狮鹫", "奇美拉", "九头蛇", "海怪", "海妖", "塞壬", "石像鬼",
+                    "吸血鬼", "狼人", "僵尸", "幽灵", "骷髅", "巫妖", "恶魔", "天使",
+                    "小仙子", "小精灵", "小矮妖", "小妖怪", "小恶魔", "小天使",
+                    "会说话的树精", "会魔法的猫头鹰", "会预言的水晶球", "会飞的毯子",
+                    "会变形的影子", "会唱歌的石头", "会跳舞的火焰", "会思考的云朵",
+                    "元素精灵", "火焰精灵", "水流精灵", "大地精灵", "空气精灵", "光明精灵", "黑暗精灵"
+                ]
+            },
+            sport: {
+                name: "体育运动",
+                items: [
+                    "足球", "篮球", "排球", "网球", "乒乓球", "羽毛球", "棒球", "垒球",
+                    "高尔夫", "台球", "保龄球", "曲棍球", "冰球", "橄榄球", "手球", "水球",
+                    "游泳", "跳水", "花样游泳", "水上芭蕾", "冲浪", "帆船", "赛艇", "皮划艇",
+                    "田径", "跑步", "跳高", "跳远", "铅球", "标枪", "铁饼", "跨栏",
+                    "体操", "艺术体操", "蹦床", "举重", "拳击", "摔跤", "柔道", "跆拳道",
+                    "击剑", "射箭", "射击", "马术", "自行车", "摩托车赛", "赛车", "滑板",
+                    "滑雪", "滑冰", "冰壶", "雪车", "雪橇", "登山", "攀岩", "蹦极",
+                    "电子竞技", "机器人格斗", "无人机竞赛", "虚拟现实运动", "太空运动"
+                ]
+            },
+            instrument: {
+                name: "乐器与工具",
+                items: [
+                    "钢琴", "吉他", "小提琴", "大提琴", "竖琴", "长笛", "单簧管", "双簧管",
+                    "萨克斯", "小号", "长号", "圆号", "大号", "打击乐", "鼓", "钹",
+                    "二胡", "古筝", "琵琶", "笛子", "箫", "唢呐", "笙", "锣",
+                    "口琴", "手风琴", "电子琴", "合成器", "电吉他", "贝斯", "尤克里里",
+                    "锤子", "螺丝刀", "钳子", "扳手", "锯子", "钻头", "尺子", "卷尺",
+                    "剪刀", "美工刀", "胶水", "胶带", "钉子", "螺丝", "螺母", "螺栓",
+                    "画笔", "颜料", "画板", "画布", "陶轮", "雕塑刀", "雕刻刀", "缝纫机",
+                    "魔法杖", "时光沙漏", "空间罗盘", "元素法杖", "治愈水晶", "召唤铃铛"
+                ]
+            }
+        };
         
-        // 扩展默认风格列表（100个风格）
-        const defaultStyles = [
-            // 历史文化风格 (25个)
-            "唐代古风", "宋代简约", "明代华丽", "清代宫廷", "古希腊风格",
-            "古罗马风格", "古埃及风格", "玛雅文明", "阿兹特克风格", "印度莫卧儿",
-            "日本和风", "韩国朝鲜时代", "泰国泰式", "越南风格", "阿拉伯伊斯兰",
-            "波斯风格", "奥斯曼帝国", "拜占庭风格", "哥特式", "文艺复兴",
-            "巴洛克风格", "洛可可风格", "新古典主义", "浪漫主义", "维多利亚时代",
-            
-            // 现代艺术风格 (25个)
-            "印象派", "后印象派", "表现主义", "立体主义", "未来主义",
-            "达达主义", "超现实主义", "抽象表现主义", "波普艺术", "极简主义",
-            "概念艺术", "装置艺术", "行为艺术", "大地艺术", "光艺术",
-            "数字艺术", "新媒体艺术", "街头艺术", "涂鸦艺术", "漫画风格",
-            "动漫风格", "像素艺术", "低多边形", "扁平化设计", "渐变风格",
-            
-            // 科幻未来风格 (25个)
-            "赛博朋克", "蒸汽朋克", "柴油朋克", "原子朋克", "生物朋克",
-            "纳米朋克", "太阳能朋克", "气候朋克", "太空歌剧", "硬科幻",
-            "软科幻", "外星风格", "星际旅行", "未来城市", "反乌托邦",
-            "乌托邦", "后末日", "废土风格", "机械美学", "合成器浪潮",
-            "霓虹美学", "全息投影", "虚拟现实", "增强现实", "元宇宙风格",
-            
-            // 奇幻魔法风格 (25个)
-            "魔幻现实主义", "高奇幻", "低奇幻", "黑暗奇幻", "光明奇幻",
-            "童话风格", "神话风格", "龙与地下城", "中世纪奇幻", "东方奇幻",
-            "西方奇幻", "精灵风格", "矮人风格", "兽人风格", "魔法学院",
-            "巫师世界", "吸血鬼风格", "狼人风格", "幽灵风格", "僵尸启示录",
-            "克苏鲁风格", "洛夫克拉夫特式", "童话王国", "糖果世界", "巧克力王国",
-            
-            // 自然环境风格 (20个)
-            "海底世界", "热带雨林", "沙漠风情", "雪山之巅", "草原牧场",
-            "森林深处", "田园风光", "乡村风格", "海滩度假", "岛屿天堂",
-            "北极光", "星空宇宙", "云上世界", "火山地带", "洞穴探险",
-            "花园仙境", "植物园", "动物园风格", "水族馆", "自然保护区",
-            
-            // 特殊主题风格 (15个)
-            "会说话的动物伙伴", "机器人伙伴", "人工智能助手", "时间旅行", "平行宇宙",
-            "梦境世界", "潜意识空间", "记忆宫殿", "思维导图", "情感可视化",
-            "数据可视化", "信息图表", "教育风格", "儿童风格", "老年友好"
-        ];
+        // 风格库（保持不变）
+        const styleLibraries = {
+            all: {
+                name: "全部风格",
+                items: [
+                    // 大师风格类
+                    "达芬奇风格", "米开朗基罗风格", "拉斐尔风格", "提香风格", "伦勃朗风格",
+                    "维米尔风格", "鲁本斯风格", "梵高风格", "莫奈风格", "塞尚风格",
+                    "高更风格", "雷诺阿风格", "德加风格", "马奈风格", "毕加索风格",
+                    "马蒂斯风格", "达利风格", "蒙克风格", "蒙德里安风格", "康定斯基风格",
+                    "徐悲鸿风格", "齐白石风格", "张大千风格", "吴冠中风格", "李可染风格",
+                    // 科幻未来类
+                    "赛博朋克", "蒸汽朋克", "柴油朋克", "原子朋克", "生物朋克",
+                    "纳米朋克", "太阳能朋克", "气候朋克", "太空歌剧", "硬科幻",
+                    "软科幻", "外星风格", "星际旅行", "未来城市", "反乌托邦",
+                    "乌托邦", "后末日", "废土风格", "机械美学", "合成器浪潮",
+                    // 奇幻魔幻类
+                    "魔幻现实主义", "高奇幻", "低奇幻", "黑暗奇幻", "光明奇幻",
+                    "童话风格", "神话风格", "龙与地下城", "中世纪奇幻", "东方奇幻",
+                    "西方奇幻", "精灵风格", "矮人风格", "兽人风格", "魔法学院",
+                    "巫师世界", "吸血鬼风格", "狼人风格", "幽灵风格", "僵尸启示录",
+                    // 艺术流派类
+                    "印象派", "后印象派", "表现主义", "立体主义", "未来主义",
+                    "达达主义", "超现实主义", "抽象表现主义", "波普艺术", "极简主义",
+                    // 文化风格类
+                    "唐代古风", "宋代简约", "明代华丽", "清代宫廷", "古希腊风格",
+                    "古罗马风格", "古埃及风格", "玛雅文明", "阿兹特克风格", "印度莫卧儿",
+                    // 数字艺术类
+                    "动漫风格", "像素艺术", "低多边形", "扁平化设计", "渐变风格",
+                    // 自然场景类
+                    "海底世界", "热带雨林", "沙漠风情", "雪山之巅", "草原牧场"
+                ]
+            },
+            master: {
+                name: "大师风格",
+                items: [
+                    "达芬奇风格", "米开朗基罗风格", "拉斐尔风格", "提香风格", "波提切利风格",
+                    "伦勃朗风格", "维米尔风格", "鲁本斯风格", "卡拉瓦乔风格", "委拉斯开兹风格",
+                    "梵高风格", "莫奈风格", "塞尚风格", "高更风格", "雷诺阿风格",
+                    "德加风格", "马奈风格", "修拉点彩风格", "西斯莱风格", "毕沙罗风格",
+                    "毕加索风格", "马蒂斯风格", "达利风格", "蒙克风格", "蒙德里安风格",
+                    "康定斯基风格", "克利风格", "夏加尔风格", "波洛克风格", "安迪·沃霍尔风格",
+                    "徐悲鸿风格", "齐白石风格", "张大千风格", "吴冠中风格", "李可染风格",
+                    "傅抱石风格", "黄宾虹风格", "林风眠风格", "潘天寿风格", "关山月风格",
+                    "葛饰北斋风格", "歌川广重风格", "草间弥生风格", "村上隆风格", "奈良美智风格"
+                ]
+            },
+            scifi: {
+                name: "科幻未来",
+                items: [
+                    "赛博朋克", "蒸汽朋克", "柴油朋克", "原子朋克", "生物朋克",
+                    "纳米朋克", "太阳能朋克", "气候朋克", "太空歌剧", "硬科幻",
+                    "软科幻", "外星风格", "星际旅行", "未来城市", "反乌托邦",
+                    "乌托邦", "后末日", "废土风格", "机械美学", "合成器浪潮",
+                    "霓虹美学", "全息投影", "虚拟现实", "增强现实", "元宇宙风格",
+                    "量子朋克", "晶体朋克", "射线朋克", "钢铁蒸汽", "真空管朋克"
+                ]
+            },
+            fantasy: {
+                name: "奇幻魔幻",
+                items: [
+                    "魔幻现实主义", "高奇幻", "低奇幻", "黑暗奇幻", "光明奇幻",
+                    "童话风格", "神话风格", "龙与地下城", "中世纪奇幻", "东方奇幻",
+                    "西方奇幻", "精灵风格", "矮人风格", "兽人风格", "魔法学院",
+                    "巫师世界", "吸血鬼风格", "狼人风格", "幽灵风格", "僵尸启示录",
+                    "克苏鲁风格", "洛夫克拉夫特式", "童话王国", "糖果世界", "巧克力王国",
+                    "蒸汽幻想", "仙侠风格", "神话史诗", "德鲁伊自然", "元素魔法"
+                ]
+            },
+            art: {
+                name: "艺术流派",
+                items: [
+                    "印象派", "后印象派", "表现主义", "立体主义", "未来主义",
+                    "达达主义", "超现实主义", "抽象表现主义", "波普艺术", "极简主义",
+                    "概念艺术", "装置艺术", "行为艺术", "大地艺术", "光艺术",
+                    "数字艺术", "新媒体艺术", "街头艺术", "涂鸦艺术", "漫画风格",
+                    "野兽派", "新艺术运动", "装饰艺术", "欧普艺术", "抽象主义"
+                ]
+            },
+            culture: {
+                name: "文化风格",
+                items: [
+                    "唐代古风", "宋代简约", "明代华丽", "清代宫廷", "古希腊风格",
+                    "古罗马风格", "古埃及风格", "玛雅文明", "阿兹特克风格", "印度莫卧儿",
+                    "日本和风", "韩国朝鲜时代", "泰国泰式", "越南风格", "阿拉伯伊斯兰",
+                    "波斯风格", "奥斯曼帝国", "拜占庭风格", "哥特式", "文艺复兴",
+                    "巴洛克风格", "洛可可风格", "新古典主义", "浪漫主义", "维多利亚时代"
+                ]
+            },
+            digital: {
+                name: "数字艺术",
+                items: [
+                    "动漫风格", "像素艺术", "低多边形", "扁平化设计", "渐变风格",
+                    "故障艺术", "孟菲斯风格", "蒸汽波", "3D渲染", "C4D风格",
+                    "矢量插画", "等距设计", "卡通渲染", "UI界面风", "科技感设计",
+                    "霓虹渐变", "酸性设计", "玻璃拟态", "新拟物化", "毛玻璃效果"
+                ]
+            },
+            nature: {
+                name: "自然场景",
+                items: [
+                    "海底世界", "热带雨林", "沙漠风情", "雪山之巅", "草原牧场",
+                    "森林深处", "田园风光", "乡村风格", "海滩度假", "岛屿天堂",
+                    "北极光", "星空宇宙", "云上世界", "火山地带", "洞穴探险",
+                    "花园仙境", "植物园", "动物园风格", "水族馆", "自然保护区",
+                    "微观世界", "季节变换", "天气现象", "地质奇观", "生态多样"
+                ]
+            }
+        };
         
-        // 初始化职业和风格数组
-        let careers = [...defaultCareers];
-        let styles = [...defaultStyles];
+        // 提示词组件库
+        const promptComponents = {
+            // 细节描述词库
+            details: {
+                animal: [
+                    "精致的毛发纹理", "生动的眼神", "优美的姿态", "自然的动作", 
+                    "逼真的皮肤质感", "灵动的表情", "优雅的轮廓", "生动的形态"
+                ],
+                building: [
+                    "精细的建筑结构", "宏伟的规模感", "精致的设计细节", "完美的透视",
+                    "复杂的几何形状", "精美的装饰元素", "壮观的全景", "精致的材料质感"
+                ],
+                person: [
+                    "生动的面部表情", "细腻的皮肤纹理", "自然的肢体语言", "精致的服饰细节",
+                    "传神的眼神", "优雅的姿态", "丰富的表情细节", "逼真的光影效果"
+                ],
+                fantasy: [
+                    "神秘的魔法光芒", "奇幻的元素效果", "超现实的形态", "神奇的细节",
+                    "魔幻的色彩组合", "不可思议的结构", "超自然的质感", "幻想的光影"
+                ],
+                default: [
+                    "精致的细节", "完美的比例", "和谐的色彩", "丰富的纹理",
+                    "生动的表现", "艺术的处理", "独特的视角", "创意的构图"
+                ]
+            },
+            
+            // 光照效果词库
+            lighting: {
+                dynamic: ["动态光影", "戏剧性照明", "强烈的明暗对比", "电影级打光"],
+                dramatic: ["戏剧性光影", "高对比度照明", "剧场灯光效果", "聚光灯光效"],
+                soft: ["柔和散射光", "自然柔光", "漫反射照明", "柔和的阴影"],
+                studio: ["摄影棚照明", "专业打光", "均匀光线", "无影灯效果"],
+                natural: ["自然日光", "黄金时刻光线", "柔和晨光", "温暖夕阳"]
+            },
+            
+            // 构图类型词库
+            composition: {
+                dynamic: ["动态构图", "对角线布局", "充满动感的画面", "非对称平衡"],
+                centered: ["中心构图", "对称布局", "平衡的画面", "焦点居中"],
+                "rule-of-thirds": ["三分法构图", "黄金比例", "视觉引导线", "平衡的布局"],
+                "close-up": ["特写构图", "细节放大", "近距离视角", "局部聚焦"],
+                "wide-shot": ["广角构图", "全景视野", "环境背景", "深远透视"]
+            },
+            
+            // 艺术媒介词库
+            medium: {
+                "digital-painting": ["数字绘画", "CG艺术", "数字插画", "计算机生成"],
+                "oil-painting": ["油画质感", "厚重笔触", "油画颜料纹理", "古典油画技法"],
+                watercolor: ["水彩效果", "透明层次", "水彩晕染", "水彩画风格"],
+                sketch: ["素描风格", "线条艺术", "草图质感", "黑白素描"],
+                photography: ["摄影写实", "照片级真实", "摄影构图", "真实光影"]
+            },
+            
+            // 渲染引擎词库
+            render: {
+                octane: ["Octane渲染", "物理级真实", "逼真材质", "电影级渲染"],
+                arnold: ["Arnold渲染", "全局照明", "真实光线追踪", "电影质感"],
+                cycles: ["Cycles渲染", "真实感渲染", "物理基础渲染", "高质量输出"],
+                unreal: ["虚幻引擎渲染", "实时渲染", "游戏级画质", "PBR材质"],
+                vray: ["VRay渲染", "照片级真实", "高级光线追踪", "建筑可视化"]
+            },
+            
+            // 画质描述词库
+            quality: {
+                standard: ["高清画质", "清晰图像", "良好细节"],
+                high: ["高质量", "精细细节", "高分辨率", "清晰锐利"],
+                ultra: ["超高清", "极致细节", "8K分辨率", "大师级画质"],
+                masterpiece: ["杰作级", "艺术珍品", "博物馆级", "收藏级画质"]
+            },
+            
+            // 风格强度词库
+            styleStrength: {
+                subtle: ["轻微风格影响", "风格元素点缀", "含蓄的风格表现"],
+                medium: ["明显的风格特征", "风格化表现", "典型的风格呈现"],
+                strong: ["强烈的风格表现", "风格主导", "鲜明的风格特征"],
+                "very-strong": ["极致的风格化", "风格完全主导", "风格特征最大化"]
+            }
+        };
+        
+        // 初始化变量
+        let currentCategory = 'career';
+        let currentStyleCategory = 'all';
+        let currentGeneratedContent = "";
+        let currentGeneratedStyle = "";
         
         // 获取DOM元素
-        const careerResult = document.getElementById('career-result');
+        const categorySelector = document.getElementById('category-selector');
+        const styleCategorySelector = document.getElementById('style-category-selector');
+        const categoryResult = document.getElementById('category-result');
         const styleResult = document.getElementById('style-result');
-        const generateCareerBtn = document.getElementById('generate-career');
+        const generateCategoryBtn = document.getElementById('generate-category');
         const generateStyleBtn = document.getElementById('generate-style');
-        const customCareerInput = document.getElementById('custom-career');
+        const customCategoryInput = document.getElementById('custom-category');
         const customStyleInput = document.getElementById('custom-style');
-        const addCareerBtn = document.getElementById('add-career');
+        const addCategoryBtn = document.getElementById('add-category');
         const addStyleBtn = document.getElementById('add-style');
-        const careerCount = document.getElementById('career-count');
+        const categoryCount = document.getElementById('category-count');
         const styleCount = document.getElementById('style-count');
+        const categoryInfo = document.getElementById('category-info');
+        const styleInfo = document.getElementById('style-info');
         
-        // 更新计数器
-        function updateCounters() {
-            careerCount.textContent = careers.length;
-            styleCount.textContent = styles.length;
+        // 提示词相关元素
+        const promptText = document.getElementById('prompt-text');
+        const copyPromptBtn = document.getElementById('copy-prompt');
+        const regeneratePromptBtn = document.getElementById('regenerate-prompt');
+        const toggleSettingsBtn = document.getElementById('toggle-settings');
+        const promptSettings = document.getElementById('prompt-settings');
+        const promptLength = document.getElementById('prompt-length');
+        const styleStrengthElement = document.getElementById('style-strength');
+        const qualityLevelElement = document.getElementById('quality-level');
+        const lightingTypeElement = document.getElementById('lighting-type');
+        
+        // 设置选项元素
+        const styleStrengthSelect = document.getElementById('style-strength-select');
+        const qualitySelect = document.getElementById('quality-select');
+        const lightingSelect = document.getElementById('lighting-select');
+        const compositionSelect = document.getElementById('composition-select');
+        const mediumSelect = document.getElementById('medium-select');
+        const renderSelect = document.getElementById('render-select');
+        
+        // 为每个类别添加本地存储支持
+        function initializeStorage() {
+            // 内容类别存储
+            for (const category in categoryLibraries) {
+                const storedItems = localStorage.getItem(`category_${category}_custom`);
+                if (storedItems) {
+                    const customItems = JSON.parse(storedItems);
+                    categoryLibraries[category].items = [...categoryLibraries[category].items, ...customItems];
+                }
+            }
+            
+            // 风格类别存储
+            for (const styleCategory in styleLibraries) {
+                const storedStyles = localStorage.getItem(`style_${styleCategory}_custom`);
+                if (storedStyles) {
+                    const customStyles = JSON.parse(storedStyles);
+                    styleLibraries[styleCategory].items = [...styleLibraries[styleCategory].items, ...customStyles];
+                }
+            }
+            
+            // 加载提示词设置
+            loadPromptSettings();
         }
         
-        // 初始化计数器
-        updateCounters();
+        // 加载提示词设置
+        function loadPromptSettings() {
+            const settings = JSON.parse(localStorage.getItem('prompt_settings') || '{}');
+            
+            if (settings.styleStrength) styleStrengthSelect.value = settings.styleStrength;
+            if (settings.quality) qualitySelect.value = settings.quality;
+            if (settings.lighting) lightingSelect.value = settings.lighting;
+            if (settings.composition) compositionSelect.value = settings.composition;
+            if (settings.medium) mediumSelect.value = settings.medium;
+            if (settings.render) renderSelect.value = settings.render;
+            
+            // 更新显示
+            updateSettingsDisplay();
+        }
         
-        // 生成随机职业
-        function generateRandomCareer() {
-            if (careers.length === 0) {
-                careerResult.textContent = "请先添加职业";
+        // 保存提示词设置
+        function savePromptSettings() {
+            const settings = {
+                styleStrength: styleStrengthSelect.value,
+                quality: qualitySelect.value,
+                lighting: lightingSelect.value,
+                composition: compositionSelect.value,
+                medium: mediumSelect.value,
+                render: renderSelect.value
+            };
+            
+            localStorage.setItem('prompt_settings', JSON.stringify(settings));
+        }
+        
+        // 更新设置显示
+        function updateSettingsDisplay() {
+            styleStrengthElement.textContent = getStrengthLabel(styleStrengthSelect.value);
+            qualityLevelElement.textContent = getQualityLabel(qualitySelect.value);
+            lightingTypeElement.textContent = getLightingLabel(lightingSelect.value);
+        }
+        
+        // 获取标签显示
+        function getStrengthLabel(value) {
+            const labels = {
+                subtle: "轻微",
+                medium: "中等",
+                strong: "强烈",
+                "very-strong": "非常强烈"
+            };
+            return labels[value] || "中等";
+        }
+        
+        function getQualityLabel(value) {
+            const labels = {
+                standard: "标准",
+                high: "高清",
+                ultra: "超高清",
+                masterpiece: "大师级"
+            };
+            return labels[value] || "高清";
+        }
+        
+        function getLightingLabel(value) {
+            const labels = {
+                dynamic: "动态光影",
+                dramatic: "戏剧性",
+                soft: "柔和",
+                studio: "摄影棚",
+                natural: "自然光"
+            };
+            return labels[value] || "动态";
+        }
+        
+        // 更新界面显示
+        function updateDisplay() {
+            const category = categoryLibraries[currentCategory];
+            const styleCategory = styleLibraries[currentStyleCategory];
+            
+            categoryInfo.textContent = `当前类别：${category.name} | 项目总数：${category.items.length}`;
+            styleInfo.textContent = `当前类别：${styleCategory.name} | 风格总数：${styleCategory.items.length}`;
+            
+            categoryCount.textContent = category.items.length;
+            styleCount.textContent = styleCategory.items.length;
+        }
+        
+        // 生成随机内容
+        function generateRandomContent() {
+            const category = categoryLibraries[currentCategory];
+            if (category.items.length === 0) {
+                categoryResult.textContent = "请先添加内容";
                 return;
             }
             
-            // 随机选择一个职业
-            const randomIndex = Math.floor(Math.random() * careers.length);
-            const selectedCareer = careers[randomIndex];
+            const randomIndex = Math.floor(Math.random() * category.items.length);
+            const selectedItem = category.items[randomIndex];
             
-            // 添加动画效果
-            careerResult.classList.remove('fade-in');
-            void careerResult.offsetWidth; // 触发重排以重新开始动画
-            careerResult.classList.add('fade-in');
+            // 动画效果
+            categoryResult.classList.remove('fade-in');
+            void categoryResult.offsetWidth;
+            categoryResult.classList.add('fade-in');
             
-            // 显示结果
-            careerResult.textContent = selectedCareer;
+            categoryResult.textContent = selectedItem;
+            currentGeneratedContent = selectedItem;
             
-            // 可选：在控制台记录生成历史
-            console.log(`生成的职业: ${selectedCareer} (第${randomIndex + 1}个/共${careers.length}个)`);
+            // 生成提示词
+            if (currentGeneratedStyle) {
+                generateFullPrompt();
+            }
+            
+            console.log(`生成的${category.name}项目: ${selectedItem}`);
         }
         
         // 生成随机风格
         function generateRandomStyle() {
-            if (styles.length === 0) {
+            const styleCategory = styleLibraries[currentStyleCategory];
+            if (styleCategory.items.length === 0) {
                 styleResult.textContent = "请先添加风格";
                 return;
             }
             
-            // 随机选择一个风格
-            const randomIndex = Math.floor(Math.random() * styles.length);
-            const selectedStyle = styles[randomIndex];
+            const randomIndex = Math.floor(Math.random() * styleCategory.items.length);
+            const selectedStyle = styleCategory.items[randomIndex];
             
-            // 添加动画效果
             styleResult.classList.remove('fade-in');
-            void styleResult.offsetWidth; // 触发重排以重新开始动画
+            void styleResult.offsetWidth;
             styleResult.classList.add('fade-in');
             
-            // 显示结果
             styleResult.textContent = selectedStyle;
+            currentGeneratedStyle = selectedStyle;
             
-            // 可选：在控制台记录生成历史
-            console.log(`生成的风格: ${selectedStyle} (第${randomIndex + 1}个/共${styles.length}个)`);
+            // 生成提示词
+            if (currentGeneratedContent) {
+                generateFullPrompt();
+            }
+            
+            console.log(`生成的${styleCategory.name}风格: ${selectedStyle}`);
         }
         
-        // 添加自定义职业
-        function addCustomCareer() {
-            const newCareer = customCareerInput.value.trim();
-            
-            if (newCareer === "") {
-                alert("请输入有效的职业名称");
+        // 生成完整提示词
+        function generateFullPrompt() {
+            if (!currentGeneratedContent || !currentGeneratedStyle) {
                 return;
             }
             
-            // 检查是否已存在
-            if (careers.includes(newCareer)) {
-                alert("该职业已存在于列表中");
+            // 获取当前设置
+            const styleStrength = styleStrengthSelect.value;
+            const quality = qualitySelect.value;
+            const lighting = lightingSelect.value;
+            const composition = compositionSelect.value;
+            const medium = mediumSelect.value;
+            const render = renderSelect.value;
+            
+            // 确定内容类型以选择细节词
+            let detailType = 'default';
+            if (currentCategory === 'animal') detailType = 'animal';
+            else if (currentCategory === 'building') detailType = 'building';
+            else if (currentCategory === 'career') detailType = 'person';
+            else if (currentCategory === 'fantasy') detailType = 'fantasy';
+            
+            // 随机选择细节词
+            const details = promptComponents.details[detailType] || promptComponents.details.default;
+            const detail1 = details[Math.floor(Math.random() * details.length)];
+            const detail2 = details[Math.floor(Math.random() * details.length)];
+            
+            // 获取其他组件
+            const lightingEffect = promptComponents.lighting[lighting][Math.floor(Math.random() * promptComponents.lighting[lighting].length)];
+            const compositionType = promptComponents.composition[composition][Math.floor(Math.random() * promptComponents.composition[composition].length)];
+            const mediumType = promptComponents.medium[medium][Math.floor(Math.random() * promptComponents.medium[medium].length)];
+            const renderType = promptComponents.render[render][Math.floor(Math.random() * promptComponents.render[render].length)];
+            const qualityDesc = promptComponents.quality[quality][Math.floor(Math.random() * promptComponents.quality[quality].length)];
+            const strengthDesc = promptComponents.styleStrength[styleStrength][Math.floor(Math.random() * promptComponents.styleStrength[styleStrength].length)];
+            
+            // 构建完整提示词
+            let prompt = `${currentGeneratedContent}，${currentGeneratedStyle}风格，${strengthDesc}。\n`;
+            prompt += `细节特征：${detail1}，${detail2}。\n`;
+            prompt += `构图与视角：${compositionType}，独特的艺术视角。\n`;
+            prompt += `光影效果：${lightingEffect}，丰富的阴影层次。\n`;
+            prompt += `艺术表现：${mediumType}，${renderType}，${qualityDesc}。\n`;
+            prompt += `画面氛围：艺术感强烈，视觉冲击力强，色彩和谐统一。`;
+            
+            // 添加针对大师风格的额外描述
+            if (currentStyleCategory === 'master' || currentGeneratedStyle.includes('风格')) {
+                prompt += `\n技法要求：忠实还原该艺术家的典型笔触、色彩运用和构图特点。`;
+            }
+            
+            // 添加针对科幻/奇幻风格的额外描述
+            if (currentStyleCategory === 'scifi' || currentStyleCategory === 'fantasy') {
+                prompt += `\n氛围营造：创造沉浸式场景，突出主题的奇幻/科幻元素。`;
+            }
+            
+            // 显示提示词
+            promptText.textContent = prompt;
+            promptText.classList.add('fade-in');
+            
+            // 更新长度统计
+            promptLength.textContent = `长度: ${prompt.length} 字符`;
+            
+            // 更新设置显示
+            updateSettingsDisplay();
+            
+            console.log("生成的完整提示词:", prompt);
+        }
+        
+        // 添加自定义内容
+        function addCustomContent() {
+            const newItem = customCategoryInput.value.trim();
+            
+            if (newItem === "") {
+                alert("请输入有效的内容名称");
                 return;
             }
             
-            // 添加到职业列表
-            careers.push(newCareer);
+            const category = categoryLibraries[currentCategory];
             
-            // 更新计数器
-            updateCounters();
+            if (category.items.includes(newItem)) {
+                alert("该项目已存在于列表中");
+                return;
+            }
             
-            // 清空输入框
-            customCareerInput.value = "";
+            // 添加到当前类别
+            category.items.push(newItem);
             
-            // 提示添加成功
-            alert(`成功添加职业: ${newCareer}\n当前职业总数: ${careers.length}`);
+            // 保存到本地存储
+            let customItems = JSON.parse(localStorage.getItem(`category_${currentCategory}_custom`) || '[]');
+            customItems.push(newItem);
+            localStorage.setItem(`category_${currentCategory}_custom`, JSON.stringify(customItems));
             
-            // 记录添加历史
-            console.log(`添加的职业: ${newCareer}, 当前职业总数: ${careers.length}`);
+            updateDisplay();
+            customCategoryInput.value = "";
+            alert(`成功添加 ${category.name} 项目: ${newItem}`);
+            
+            // 自动生成一次
+            generateRandomContent();
         }
         
         // 添加自定义风格
@@ -603,52 +1260,120 @@
                 return;
             }
             
-            // 检查是否已存在
-            if (styles.includes(newStyle)) {
+            const styleCategory = styleLibraries[currentStyleCategory];
+            
+            if (styleCategory.items.includes(newStyle)) {
                 alert("该风格已存在于列表中");
                 return;
             }
             
-            // 添加到风格列表
-            styles.push(newStyle);
+            // 添加到当前类别
+            styleCategory.items.push(newStyle);
             
-            // 更新计数器
-            updateCounters();
+            // 保存到本地存储
+            let customStyles = JSON.parse(localStorage.getItem(`style_${currentStyleCategory}_custom`) || '[]');
+            customStyles.push(newStyle);
+            localStorage.setItem(`style_${currentStyleCategory}_custom`, JSON.stringify(customStyles));
             
-            // 清空输入框
+            updateDisplay();
             customStyleInput.value = "";
+            alert(`成功添加 ${styleCategory.name} 风格: ${newStyle}`);
             
-            // 提示添加成功
-            alert(`成功添加风格: ${newStyle}\n当前风格总数: ${styles.length}`);
-            
-            // 记录添加历史
-            console.log(`添加的风格: ${newStyle}, 当前风格总数: ${styles.length}`);
+            // 自动生成一次
+            generateRandomStyle();
         }
         
-        // 快速连续生成函数
-        function rapidGenerate(button, generator, count) {
-            let i = 0;
-            const interval = setInterval(() => {
-                generator();
-                i++;
-                if (i >= count) {
-                    clearInterval(interval);
-                    button.disabled = false;
-                    button.innerHTML = `<i class="fas fa-bolt"></i> 快速生成10次`;
-                }
-            }, 100);
+        // 复制提示词到剪贴板
+        function copyPromptToClipboard() {
+            const textToCopy = promptText.textContent;
+            
+            if (textToCopy.includes("生成内容与风格后")) {
+                alert("请先生成内容和风格组合");
+                return;
+            }
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // 显示复制成功反馈
+                copyPromptBtn.textContent = "已复制！";
+                copyPromptBtn.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyPromptBtn.textContent = "复制提示词";
+                    copyPromptBtn.classList.remove('copied');
+                }, 2000);
+                
+                console.log("提示词已复制到剪贴板");
+            }).catch(err => {
+                console.error("复制失败: ", err);
+                alert("复制失败，请手动选择文本复制");
+            });
+        }
+        
+        // 重新生成提示词（使用相同的内容和风格）
+        function regeneratePrompt() {
+            if (!currentGeneratedContent || !currentGeneratedStyle) {
+                alert("请先生成内容和风格");
+                return;
+            }
+            
+            generateFullPrompt();
+            
+            // 显示反馈
+            regeneratePromptBtn.textContent = "已重新生成！";
+            setTimeout(() => {
+                regeneratePromptBtn.textContent = "重新生成提示词";
+            }, 1500);
+        }
+        
+        // 切换设置面板
+        function toggleSettingsPanel() {
+            promptSettings.classList.toggle('active');
+            toggleSettingsBtn.innerHTML = promptSettings.classList.contains('active') 
+                ? '<i class="fas fa-times"></i> 关闭设置' 
+                : '<i class="fas fa-cog"></i> 提示词设置';
+            
+            if (promptSettings.classList.contains('active')) {
+                savePromptSettings();
+            }
         }
         
         // 事件监听
-        generateCareerBtn.addEventListener('click', generateRandomCareer);
+        categorySelector.addEventListener('change', function() {
+            currentCategory = this.value;
+            updateDisplay();
+            generateRandomContent();
+        });
+        
+        styleCategorySelector.addEventListener('change', function() {
+            currentStyleCategory = this.value;
+            updateDisplay();
+            generateRandomStyle();
+        });
+        
+        generateCategoryBtn.addEventListener('click', generateRandomContent);
         generateStyleBtn.addEventListener('click', generateRandomStyle);
-        addCareerBtn.addEventListener('click', addCustomCareer);
+        addCategoryBtn.addEventListener('click', addCustomContent);
         addStyleBtn.addEventListener('click', addCustomStyle);
+        copyPromptBtn.addEventListener('click', copyPromptToClipboard);
+        regeneratePromptBtn.addEventListener('click', regeneratePrompt);
+        toggleSettingsBtn.addEventListener('click', toggleSettingsPanel);
+        
+        // 设置变化时保存并重新生成提示词
+        const settingSelects = [styleStrengthSelect, qualitySelect, lightingSelect, compositionSelect, mediumSelect, renderSelect];
+        settingSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                savePromptSettings();
+                updateSettingsDisplay();
+                if (currentGeneratedContent && currentGeneratedStyle) {
+                    generateFullPrompt();
+                }
+            });
+        });
         
         // 允许按Enter键添加
-        customCareerInput.addEventListener('keypress', function(e) {
+        customCategoryInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                addCustomCareer();
+                addCustomContent();
             }
         });
         
@@ -659,23 +1384,45 @@
         });
         
         // 双击快速生成
-        generateCareerBtn.addEventListener('dblclick', function() {
+        generateCategoryBtn.addEventListener('dblclick', function() {
             this.disabled = true;
             this.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> 快速生成中...`;
-            rapidGenerate(this, generateRandomCareer, 10);
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                generateRandomContent();
+                i++;
+                if (i >= 5) {
+                    clearInterval(interval);
+                    this.disabled = false;
+                    this.innerHTML = `<i class="fas fa-dice"></i> 生成随机内容`;
+                }
+            }, 150);
         });
         
         generateStyleBtn.addEventListener('dblclick', function() {
             this.disabled = true;
             this.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> 快速生成中...`;
-            rapidGenerate(this, generateRandomStyle, 10);
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                generateRandomStyle();
+                i++;
+                if (i >= 5) {
+                    clearInterval(interval);
+                    this.disabled = false;
+                    this.innerHTML = `<i class="fas fa-magic"></i> 生成随机风格`;
+                }
+            }, 150);
         });
         
-        // 页面加载时生成初始结果
+        // 页面加载初始化
         window.addEventListener('load', function() {
-            // 延迟一点时间显示初始结果，以获得更好的视觉效果
+            initializeStorage();
+            updateDisplay();
+            
             setTimeout(() => {
-                generateRandomCareer();
+                generateRandomContent();
                 generateRandomStyle();
             }, 300);
         });
